@@ -5,7 +5,6 @@ import subprocess
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from oemer.downloader import fetch_models
 
 app = FastAPI(title="OMR Oemer Server")
 
@@ -17,11 +16,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-try:
-    fetch_models()
-except Exception as e:
-    print("Estado de modelos Oemer:", e)
 
 @app.get("/")
 def home():
@@ -37,6 +31,7 @@ async def predict(file: UploadFile = File(...)):
             f.write(content)
 
         try:
+            # Oemer descargará los modelos automáticamente aquí en su primera ejecución
             subprocess.run(["oemer", input_path, "-o", tmpdir], check=True)
         except Exception as err:
             raise HTTPException(status_code=500, detail=f"Error en OMR: {str(err)}")
